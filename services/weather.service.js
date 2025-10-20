@@ -5,7 +5,7 @@ const apiKey = process.env.WEATHER_API_KEY;
 const apiUrl = process.env.WEATHER_API_URL || 'https://api.openweathermap.org/data/2.5/weather';
 const cacheTTL = parseInt(process.env.REDIS_CACHE_TTL) || 3600;
 
-// Weather conditions that affect Pokemon types
+// Conditions météo qui affectent les types de Pokemon
 const weatherEffects = {
   Rain: {
     weakens: ['fire'],
@@ -42,23 +42,23 @@ const weatherEffects = {
 };
 
 exports.getWeather = async (latitude = null, longitude = null) => {
-  // Use default coordinates if not provided
+  // Utiliser les coordonnées par défaut si non fournies
   const lat = latitude || process.env.DEFAULT_LATITUDE || 48.8566;
   const lon = longitude || process.env.DEFAULT_LONGITUDE || 2.3522;
   
   const cacheKey = `weather:${lat}:${lon}`;
   
-  // Try to get from cache first
+  // Essayer de récupérer depuis le cache d'abord
   const cachedWeather = await redisService.get(cacheKey);
   if (cachedWeather) {
-    console.log('🎯 Weather data retrieved from cache'.cyan);
+    console.log('🎯 Données météo récupérées depuis le cache'.cyan);
     return cachedWeather;
   }
 
-  // If not in cache, fetch from API
+  // Si pas en cache, récupérer depuis l'API
   try {
     if (!apiKey || apiKey === 'your_api_key_here') {
-      console.warn('⚠️  No valid weather API key, using default weather'.yellow);
+      console.warn('⚠️  Pas de clé API météo valide, utilisation de la météo par défaut'.yellow);
       const defaultWeather = {
         main: 'Clear',
         description: 'clear sky',
@@ -87,15 +87,15 @@ exports.getWeather = async (latitude = null, longitude = null) => {
       source: 'api'
     };
 
-    // Store in cache
+    // Stocker en cache
     await redisService.set(cacheKey, weatherData, cacheTTL);
-    console.log('🌤️  Weather data fetched from API and cached'.green);
+    console.log('🌤️  Données météo récupérées depuis l\'API et mises en cache'.green);
 
     return weatherData;
   } catch (error) {
     console.error('❌ Error fetching weather data:'.red, error.message);
     
-    // Return default weather in case of error
+    // Retourner la météo par défaut en cas d'erreur
     const defaultWeather = {
       main: 'Clear',
       description: 'clear sky',
@@ -115,7 +115,7 @@ exports.calculatePokemonModifiers = (pokemonType, secondaryType, weather) => {
   let attackModifier = 1.0;
   let defenseModifier = 1.0;
   
-  // Check primary type
+  // Vérifier le type principal
   if (effects.weakens.includes(pokemonType)) {
     attackModifier *= 0.7;
     defenseModifier *= 0.8;
@@ -125,7 +125,7 @@ exports.calculatePokemonModifiers = (pokemonType, secondaryType, weather) => {
     defenseModifier *= 1.2;
   }
   
-  // Check secondary type if exists
+  // Vérifier le type secondaire s'il existe
   if (secondaryType) {
     if (effects.weakens.includes(secondaryType)) {
       attackModifier *= 0.85;

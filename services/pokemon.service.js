@@ -8,7 +8,7 @@ exports.getAll = async (includeWeather = false, latitude = null, longitude = nul
   try {
     const cacheKey = 'pokemons:all';
     
-    // Try cache first
+    // Essayer le cache d'abord
     let pokemons = await redisService.get(cacheKey);
     
     if (!pokemons) {
@@ -16,17 +16,17 @@ exports.getAll = async (includeWeather = false, latitude = null, longitude = nul
         order: [['id', 'ASC']]
       });
       
-      // Convert Sequelize instances to plain objects
+      // Convertir les instances Sequelize en objets simples
       pokemons = pokemons.map(p => p.toJSON());
       
-      // Cache the result
+      // Mettre en cache le résultat
       await redisService.set(cacheKey, pokemons, cacheTTL);
-      console.log('📦 Pokemons fetched from database and cached'.green);
+      console.log('📦 Pokemons récupérés depuis la base de données et mis en cache'.green);
     } else {
-      console.log('🎯 Pokemons retrieved from cache'.cyan);
+      console.log('🎯 Pokemons récupérés depuis le cache'.cyan);
     }
 
-    // Apply weather effects if requested
+    // Appliquer les effets météo si demandé
     if (includeWeather) {
       const weather = await weatherService.getWeather(latitude, longitude);
       pokemons = pokemons.map(pokemon => 
@@ -45,7 +45,7 @@ exports.getById = async (id, includeWeather = false, latitude = null, longitude 
   try {
     const cacheKey = `pokemon:${id}`;
     
-    // Try cache first
+    // Essayer le cache d'abord
     let pokemon = await redisService.get(cacheKey);
     
     if (!pokemon) {
@@ -57,14 +57,14 @@ exports.getById = async (id, includeWeather = false, latitude = null, longitude 
       
       pokemon = pokemonInstance.toJSON();
       
-      // Cache the result
+      // Mettre en cache le résultat
       await redisService.set(cacheKey, pokemon, cacheTTL);
-      console.log(`📦 Pokemon ${id} fetched from database and cached`.green);
+      console.log(`📦 Pokemon ${id} récupéré depuis la base de données et mis en cache`.green);
     } else {
-      console.log(`🎯 Pokemon ${id} retrieved from cache`.cyan);
+      console.log(`🎯 Pokemon ${id} récupéré depuis le cache`.cyan);
     }
 
-    // Apply weather effects if requested
+    // Appliquer les effets météo si demandé
     if (includeWeather) {
       const weather = await weatherService.getWeather(latitude, longitude);
       pokemon = weatherService.applyWeatherEffects(pokemon, weather);
@@ -86,7 +86,7 @@ exports.create = async (pokemonData) => {
   try {
     const pokemon = await Pokemon.create(pokemonData);
     
-    // Invalidate cache
+    // Invalider le cache
     await redisService.del('pokemons:all');
     
     console.log(`✅ Pokemon ${pokemon.id} created`.green);
@@ -107,7 +107,7 @@ exports.update = async (id, pokemonData) => {
 
     await pokemon.update(pokemonData);
     
-    // Invalidate cache
+    // Invalider le cache
     await redisService.del(`pokemon:${id}`);
     await redisService.del('pokemons:all');
     
@@ -129,7 +129,7 @@ exports.delete = async (id) => {
 
     await pokemon.destroy();
     
-    // Invalidate cache
+    // Invalider le cache
     await redisService.del(`pokemon:${id}`);
     await redisService.del('pokemons:all');
     
@@ -145,7 +145,7 @@ exports.searchByType = async (type, includeWeather = false, latitude = null, lon
   try {
     const cacheKey = `pokemons:type:${type}`;
     
-    // Try cache first
+    // Essayer le cache d'abord
     let pokemons = await redisService.get(cacheKey);
     
     if (!pokemons) {
@@ -158,14 +158,14 @@ exports.searchByType = async (type, includeWeather = false, latitude = null, lon
       
       pokemons = pokemonInstances.map(p => p.toJSON());
       
-      // Cache the result
+      // Mettre en cache le résultat
       await redisService.set(cacheKey, pokemons, cacheTTL);
-      console.log(`📦 Pokemons of type ${type} fetched from database and cached`.green);
+      console.log(`📦 Pokemons de type ${type} récupérés depuis la base de données et mis en cache`.green);
     } else {
-      console.log(`🎯 Pokemons of type ${type} retrieved from cache`.cyan);
+      console.log(`🎯 Pokemons de type ${type} récupérés depuis le cache`.cyan);
     }
 
-    // Apply weather effects if requested
+    // Appliquer les effets météo si demandé
     if (includeWeather) {
       const weather = await weatherService.getWeather(latitude, longitude);
       pokemons = pokemons.map(pokemon => 

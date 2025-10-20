@@ -40,12 +40,12 @@ module.exports = {
       height: {
         type: Sequelize.FLOAT,
         allowNull: true,
-        comment: 'Height in meters'
+        comment: 'Taille en mètres'
       },
       weight: {
         type: Sequelize.FLOAT,
         allowNull: true,
-        comment: 'Weight in kilograms'
+        comment: 'Poids en kilogrammes'
       },
       description: {
         type: Sequelize.TEXT,

@@ -38,7 +38,7 @@ describe('Redis Service', () => {
       const retrieved = await redisService.get(key);
       expect(retrieved).toEqual(value);
 
-      // Wait for TTL to expire
+      // Attendre l'expiration du TTL
       await new Promise(resolve => setTimeout(resolve, 2100));
       const expired = await redisService.get(key);
       expect(expired).toBeNull();

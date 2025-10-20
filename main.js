@@ -5,23 +5,23 @@ const app = require('@app');
 const redisService = require('@services/redis.service');
 const server = http.createServer(app);
 
-// Initialize Redis connection
+// Initialiser la connexion Redis
 redisService.connect();
 
-// Graceful shutdown
+// Arrêt gracieux
 process.on('SIGTERM', async () => {
-  console.log('SIGTERM signal received: closing HTTP server');
+  console.log('Signal SIGTERM reçu : fermeture du serveur HTTP');
   await redisService.disconnect();
   server.close(() => {
-    console.log('HTTP server closed');
+    console.log('Serveur HTTP fermé');
   });
 });
 
 process.on('SIGINT', async () => {
-  console.log('SIGINT signal received: closing HTTP server');
+  console.log('Signal SIGINT reçu : fermeture du serveur HTTP');
   await redisService.disconnect();
   server.close(() => {
-    console.log('HTTP server closed');
+    console.log('Serveur HTTP fermé');
     process.exit(0);
   });
 });

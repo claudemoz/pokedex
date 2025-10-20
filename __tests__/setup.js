@@ -1,11 +1,11 @@
 require('module-alias/register');
 require('colors');
 
-// Set test environment
+// Définir l'environnement de test
 process.env.NODE_ENV = 'test';
 process.env.DEV_DB_NAME = 'pokedex_test';
 
-// Mock console methods to reduce noise during tests
+// Simuler les méthodes console pour réduire le bruit pendant les tests
 global.console = {
   ...console,
   log: jest.fn(),

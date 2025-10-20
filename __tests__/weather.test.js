@@ -55,7 +55,7 @@ describe('Weather Service', () => {
       const modifiers = weatherService.calculatePokemonModifiers('fire', 'flying', weather);
 
       expect(modifiers.affected).toBe(true);
-      // Both types are affected by rain (fire weakened, flying can be weakened in thunderstorm)
+      // Les deux types sont affectés par la pluie (feu affaibli, vol peut être affaibli en cas d'orage)
     });
 
     test('Should not affect pokemon in neutral weather', () => {

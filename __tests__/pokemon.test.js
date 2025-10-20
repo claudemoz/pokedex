@@ -7,13 +7,13 @@ describe('Pokemon CRUD Operations', () => {
   let createdPokemonId;
 
   beforeAll(async () => {
-    // Initialize Redis
+    // Initialiser Redis
     redisService.connect();
     
-    // Sync database
+    // Synchroniser la base de données
     await sequelize.sync({ force: true });
     
-    // Create initial test data
+    // Créer les données de test initiales
     await Pokemon.create({
       name: 'Charizard',
       type: 'fire',
@@ -28,13 +28,13 @@ describe('Pokemon CRUD Operations', () => {
   });
 
   afterAll(async () => {
-    // Clean up
+    // Nettoyer
     await sequelize.close();
     await redisService.disconnect();
   });
 
   afterEach(async () => {
-    // Clear cache after each test
+    // Vider le cache après chaque test
     await redisService.flushAll();
   });
 
@@ -83,7 +83,7 @@ describe('Pokemon CRUD Operations', () => {
 
     test('Should fail to create pokemon with duplicate name', async () => {
       const duplicatePokemon = {
-        name: 'Charizard', // Already exists
+        name: 'Charizard', // Existe déjà
         type: 'fire',
         baseAttack: 84,
         baseDefense: 78,
@@ -213,7 +213,7 @@ describe('Pokemon CRUD Operations', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.message).toContain('supprimé');
 
-      // Verify it's deleted
+      // Vérifier qu'il est bien supprimé
       const getResponse = await request(app)
         .get(`/api/v1/pokemons/${createdPokemonId}`)
         .expect(404);

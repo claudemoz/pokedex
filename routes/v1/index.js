@@ -1,16 +1,16 @@
 const router = require('express').Router();
 
-// Pokemon routes
+// Routes Pokemon
 router.use('/pokemons', require('@routes/v1/pokemon.routes'));
 
-// Weather routes
+// Routes Météo
 router.use('/weather', require('@routes/v1/weather.routes'));
 
-// Health check
+// Vérification de santé
 router.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'API is running',
+    message: 'API opérationnelle',
     timestamp: new Date().toISOString()
   });
 });

@@ -58,12 +58,12 @@ module.exports = (sequelize, DataTypes) => {
     height: {
       type: DataTypes.FLOAT,
       allowNull: true,
-      comment: 'Height in meters'
+      comment: 'Taille en mètres'
     },
     weight: {
       type: DataTypes.FLOAT,
       allowNull: true,
-      comment: 'Weight in kilograms'
+      comment: 'Poids en kilogrammes'
     },
     description: {
       type: DataTypes.TEXT,
@@ -75,7 +75,7 @@ module.exports = (sequelize, DataTypes) => {
       field: 'image_url'
     }
   }, {
-    tableName: 'pokemons',
+    tableName: 'pokemon',
     timestamps: true,
     underscored: true,
     indexes: [

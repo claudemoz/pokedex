@@ -76,7 +76,7 @@ exports.create = async (req, res) => {
   } catch (error) {
     console.error('Error in create controller:', error);
     
-    // Handle unique constraint error
+    // Gérer l'erreur de contrainte unique
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(409).json({
         success: false,
@@ -115,7 +115,7 @@ exports.update = async (req, res) => {
   } catch (error) {
     console.error('Error in update controller:', error);
 
-    // Handle unique constraint error
+    // Gérer l'erreur de contrainte unique
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(409).json({
         success: false,
