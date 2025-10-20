@@ -1,5 +1,4 @@
-require('module-alias/register');
-require('colors');
+
 
 // Définir l'environnement de test
 process.env.NODE_ENV = 'test';

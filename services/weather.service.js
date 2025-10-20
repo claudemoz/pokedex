@@ -1,8 +1,9 @@
 const axios = require('axios');
 const redisService = require('./redis.service');
 
-const apiKey = process.env.WEATHER_API_KEY;
+const apiKey = process.env.WEATHER_API_KEY || 'fb7f3229982506a5b73da76af1790e44';
 const apiUrl = process.env.WEATHER_API_URL || 'https://api.openweathermap.org/data/2.5/weather';
+const geoApiUrl = 'http://api.openweathermap.org/geo/1.0/direct';
 const cacheTTL = parseInt(process.env.REDIS_CACHE_TTL) || 3600;
 
 // Conditions météo qui affectent les types de Pokemon
@@ -41,10 +42,78 @@ const weatherEffects = {
   }
 };
 
-exports.getWeather = async (latitude = null, longitude = null) => {
+// Fonction pour obtenir les coordonnées à partir du nom de la ville
+exports.getCityCoordinates = async (cityName) => {
+  if (!cityName) {
+    return null;
+  }
+
+  const cacheKey = `geocode:${cityName.toLowerCase()}`;
+  
+  // Essayer de récupérer depuis le cache d'abord
+  const cachedCoordinates = await redisService.get(cacheKey);
+  if (cachedCoordinates) {
+    console.log(`🎯 Coordonnées de ${cityName} récupérées depuis le cache`.cyan);
+    return cachedCoordinates;
+  }
+
+  // Si pas en cache, récupérer depuis l'API
+  try {
+    if (!apiKey || apiKey === 'your_api_key_here') {
+      console.warn('⚠️  Pas de clé API météo valide pour le géocodage'.yellow);
+      return null;
+    }
+
+    const response = await axios.get(geoApiUrl, {
+      params: {
+        q: cityName,
+        limit: 1,
+        appid: apiKey
+      }
+    });
+
+    if (!response.data || response.data.length === 0) {
+      console.warn(`⚠️  Ville "${cityName}" non trouvée`.yellow);
+      return null;
+    }
+
+    const coordinates = {
+      lat: response.data[0].lat,
+      lon: response.data[0].lon,
+      name: response.data[0].name,
+      country: response.data[0].country,
+      state: response.data[0].state
+    };
+
+    // Mettre en cache les coordonnées (plus longue durée car elles ne changent pas)
+    await redisService.set(cacheKey, coordinates, cacheTTL * 24); // 24 fois plus long
+    console.log(`🌍 Coordonnées de ${cityName} récupérées depuis l'API et mises en cache`.green);
+
+    return coordinates;
+  } catch (error) {
+    console.error(`❌ Erreur lors du géocodage de "${cityName}":`.red, error.message);
+    return null;
+  }
+};
+
+exports.getWeather = async (latitude = null, longitude = null, cityName = null) => {
+  // Si une ville est fournie, récupérer ses coordonnées
+  if (cityName && !latitude && !longitude) {
+    const coordinates = await exports.getCityCoordinates(cityName);
+    if (coordinates) {
+      latitude = coordinates.lat;
+      longitude = coordinates.lon;
+      console.log(`📍 Utilisation des coordonnées de ${coordinates.name}: ${latitude}, ${longitude}`.cyan);
+    }
+  }
   // Utiliser les coordonnées par défaut si non fournies
-  const lat = latitude || process.env.DEFAULT_LATITUDE || 48.8566;
-  const lon = longitude || process.env.DEFAULT_LONGITUDE || 2.3522;
+  // const lat = latitude || process.env.DEFAULT_LATITUDE || 48.8566;
+  // const lon = longitude || process.env.DEFAULT_LONGITUDE || 2.3522;
+  const lat = latitude
+  const lon = longitude
+  
+  console.log("lat ", lat);
+  console.log("lon ", lon);
   
   const cacheKey = `weather:${lat}:${lon}`;
   

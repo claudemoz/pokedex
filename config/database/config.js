@@ -15,11 +15,11 @@ module.exports = {
     logging: false
   },
   test: {
-    username: process.env.CI_DB_USERNAME || 'postgres',
-    password: process.env.CI_DB_PASSWORD || 'postgres',
+    username: process.env.CI_DB_USERNAME || process.env.DEV_DB_USERNAME || 'postgres',
+    password: process.env.CI_DB_PASSWORD || process.env.DEV_DB_PASSWORD || 'postgres',
     database: process.env.CI_DB_NAME || 'pokedex_test',
-    host: '127.0.0.1',
-    port: 5432,
+    host: process.env.CI_DB_HOSTNAME || process.env.DEV_DB_HOSTNAME || '127.0.0.1',
+    port: process.env.CI_DB_PORT || process.env.DEV_DB_PORT || 5432,
     dialect: 'postgres',
     dialectOptions: {
       ssl: false

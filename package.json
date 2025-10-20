@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node main.js",
     "dev": "nodemon main.js",
-    "test": "jest --coverage --verbose",
+    "test": "NODE_ENV=test jest --coverage --verbose --runInBand",
     "test:watch": "jest --watch",
     "db:migrate": "sequelize-cli db:migrate",
     "db:seed": "sequelize-cli db:seed:all",

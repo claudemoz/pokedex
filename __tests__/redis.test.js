@@ -1,8 +1,10 @@
-const redisService = require('../services/redis.service');
+const redisService = require('@services/redis.service');
 
 describe('Redis Service', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     redisService.connect();
+    // Attendre que la connexion soit établie
+    await new Promise(resolve => setTimeout(resolve, 1000));
   });
 
   afterAll(async () => {
@@ -18,7 +20,9 @@ describe('Redis Service', () => {
       const key = 'test:key';
       const value = { name: 'Pikachu', type: 'electric' };
 
-      await redisService.set(key, value);
+      const setResult = await redisService.set(key, value);
+      expect(setResult).toBe(true);
+
       const retrieved = await redisService.get(key);
 
       expect(retrieved).toEqual(value);
@@ -34,7 +38,9 @@ describe('Redis Service', () => {
       const value = { test: 'data' };
       const ttl = 2;
 
-      await redisService.set(key, value, ttl);
+      const setResult = await redisService.set(key, value, ttl);
+      expect(setResult).toBe(true);
+
       const retrieved = await redisService.get(key);
       expect(retrieved).toEqual(value);
 

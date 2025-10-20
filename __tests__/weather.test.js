@@ -1,4 +1,4 @@
-const weatherService = require('../services/weather.service');
+const weatherService = require('@services/weather.service');
 
 describe('Weather Service', () => {
   describe('Weather API calls', () => {

@@ -22,6 +22,8 @@ Une API REST moderne pour gérer un Pokédex avec intégration de cache Redis et
 - ✅ Recherche par type de Pokémon
 - ✅ Cache Redis pour optimiser les performances
 - ✅ Intégration d'API météo (OpenWeatherMap)
+- ✅ **Géocodage : Récupération automatique des coordonnées par nom de ville**
+- ✅ Effets météo sur les statistiques des Pokémons
 - ✅ ORM Sequelize avec PostgreSQL
 - ✅ Rate limiting pour protéger l'API
 - ✅ Sécurité avec Helmet
@@ -199,13 +201,21 @@ GET /api/v1/pokemons
 
 **Paramètres de requête** :
 - `weather` (boolean) : Inclure les informations météo
-- `lat` (float) : Latitude pour la météo
-- `lon` (float) : Longitude pour la météo
+- `city` (string) : Nom de la ville pour la météo (ex: "Paris", "London", "Tokyo")
+- `lat` (float) : Latitude pour la météo (optionnel si `city` est fourni)
+- `lon` (float) : Longitude pour la météo (optionnel si `city` est fourni)
 
 **Exemple** :
 ```bash
+# Sans météo
 curl http://localhost:9000/api/v1/pokemons
-curl http://localhost:9000/api/v1/pokemons?weather=true&lat=48.8566&lon=2.3522
+
+# Avec météo par ville
+curl "http://localhost:9000/api/v1/pokemons?weather=true&city=Paris"
+curl "http://localhost:9000/api/v1/pokemons?weather=true&city=London"
+
+# Avec météo par coordonnées
+curl "http://localhost:9000/api/v1/pokemons?weather=true&lat=48.8566&lon=2.3522"
 ```
 
 **Réponse** :
@@ -314,12 +324,21 @@ GET /api/v1/weather
 ```
 
 **Paramètres de requête** :
-- `lat` (float) : Latitude (optionnel, utilise Paris par défaut)
-- `lon` (float) : Longitude (optionnel, utilise Paris par défaut)
+- `city` (string) : Nom de la ville (ex: "Paris", "New York", "Tokyo")
+- `lat` (float) : Latitude (optionnel si `city` est fourni, utilise Paris par défaut)
+- `lon` (float) : Longitude (optionnel si `city` est fourni, utilise Paris par défaut)
 
 **Exemple** :
 ```bash
+# Météo par défaut (Paris)
 curl http://localhost:9000/api/v1/weather
+
+# Météo par ville
+curl "http://localhost:9000/api/v1/weather?city=London"
+curl "http://localhost:9000/api/v1/weather?city=Tokyo"
+curl "http://localhost:9000/api/v1/weather?city=New%20York"
+
+# Météo par coordonnées
 curl "http://localhost:9000/api/v1/weather?lat=45.5017&lon=-73.5673"
 ```
 
@@ -398,7 +417,7 @@ pokedex/
 
 - **pokemon.service.js** : Logique métier pour les opérations CRUD des Pokémons, intégration du cache Redis
 - **redis.service.js** : Gestion de la connexion Redis et des opérations de cache
-- **weather.service.js** : Intégration avec l'API OpenWeatherMap
+- **weather.service.js** : Intégration avec l'API OpenWeatherMap (météo et géocodage)
 
 ### Middleware
 
@@ -411,7 +430,28 @@ pokedex/
 
 Le projet utilise Jest pour les tests unitaires et d'intégration.
 
+### Préparer l'environnement de test
+
+**Première fois uniquement** - Créer la base de données de test :
+
+```bash
+# Dans Docker
+docker exec pokedex_postgres psql -U postgres -c "CREATE DATABASE pokedex_test;"
+docker exec -e NODE_ENV=test pokedex_app npx sequelize-cli db:migrate
+```
+
 ### Lancer tous les tests
+
+**Avec Docker (recommandé)** :
+```bash
+# Utiliser le script automatique
+bash test-docker.sh
+
+# Ou manuellement
+docker exec -e DOCKER_ENV=true pokedex_app npm test
+```
+
+**En local** (nécessite PostgreSQL et Redis locaux) :
 ```bash
 npm test
 ```
@@ -429,9 +469,9 @@ npm test
 
 ### Tests disponibles
 
-- **pokemon.test.js** : Tests des endpoints Pokémon
-- **redis.test.js** : Tests du service Redis
-- **weather.test.js** : Tests du service météo
+- **pokemon.test.js** : Tests des endpoints Pokémon (CRUD complet)
+- **redis.test.js** : Tests du service Redis (cache)
+- **weather.test.js** : Tests du service météo et géocodage
 
 ## 🐳 Docker
 
@@ -586,8 +626,10 @@ L'application utilise les clés suivantes :
 - `pokemon:{id}` : Détails d'un Pokémon spécifique
 - `pokemons:type:{type}` : Liste des Pokémons par type
 - `weather:{lat}:{lon}` : Données météo pour une position
+- `geocode:{ville}` : Coordonnées géographiques d'une ville
 
 Le TTL par défaut est de 3600 secondes (1 heure), configurable via `REDIS_CACHE_TTL`.
+Les coordonnées des villes sont mises en cache pour 24 heures (86400 secondes).
 
 ### Health Checks
 

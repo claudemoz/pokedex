@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: pokedex_postgres
+    container_name: db
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -21,7 +21,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: pokedex_redis
+    container_name: redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -32,12 +32,15 @@ services:
       timeout: 20s
       retries: 10
 
-  app:
+  api:
     build: .
-    container_name: pokedex_app
+    container_name: api
     restart: unless-stopped
     ports:
       - "9000:9000"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       NODE_ENV: development
       PORT: 9000
@@ -49,7 +52,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_CACHE_TTL: 3600
-      WEATHER_API_KEY: ${WEATHER_API_KEY}
+      WEATHER_API_KEY: 7b7048a95c0160c9b69a853ee70506cc
       WEATHER_API_URL: https://api.openweathermap.org/data/2.5/weather
       DEFAULT_LATITUDE: 48.8566
       DEFAULT_LONGITUDE: 2.3522

@@ -6,8 +6,9 @@ exports.getAll = async (req, res) => {
     const includeWeather = req.query.weather === 'true';
     const latitude = req.query.lat ? parseFloat(req.query.lat) : null;
     const longitude = req.query.lon ? parseFloat(req.query.lon) : null;
+    const cityName = req.query.city || null;
 
-    const pokemons = await pokemonService.getAll(includeWeather, latitude, longitude);
+    const pokemons = await pokemonService.getAll(includeWeather, latitude, longitude, cityName);
 
     return res.status(200).json({
       success: true,
@@ -30,8 +31,9 @@ exports.getById = async (req, res) => {
     const includeWeather = req.query.weather === 'true';
     const latitude = req.query.lat ? parseFloat(req.query.lat) : null;
     const longitude = req.query.lon ? parseFloat(req.query.lon) : null;
+    const cityName = req.query.city || null;
 
-    const pokemon = await pokemonService.getById(id, includeWeather, latitude, longitude);
+    const pokemon = await pokemonService.getById(id, includeWeather, latitude, longitude, cityName);
 
     if (!pokemon) {
       return res.status(404).json({
@@ -165,8 +167,9 @@ exports.searchByType = async (req, res) => {
     const includeWeather = req.query.weather === 'true';
     const latitude = req.query.lat ? parseFloat(req.query.lat) : null;
     const longitude = req.query.lon ? parseFloat(req.query.lon) : null;
+    const cityName = req.query.city || null;
 
-    const pokemons = await pokemonService.searchByType(type, includeWeather, latitude, longitude);
+    const pokemons = await pokemonService.searchByType(type, includeWeather, latitude, longitude, cityName);
 
     return res.status(200).json({
       success: true,
@@ -188,8 +191,9 @@ exports.getWeather = async (req, res) => {
   try {
     const latitude = req.query.lat ? parseFloat(req.query.lat) : null;
     const longitude = req.query.lon ? parseFloat(req.query.lon) : null;
+    const cityName = req.query.city || null;
 
-    const weather = await weatherService.getWeather(latitude, longitude);
+    const weather = await weatherService.getWeather(latitude, longitude, cityName);
 
     return res.status(200).json({
       success: true,

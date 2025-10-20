@@ -1,7 +1,7 @@
 const request = require('supertest');
-const app = require('../app');
-const { sequelize, Pokemon } = require('../models');
-const redisService = require('../services/redis.service');
+const app = require('@app');
+const { sequelize, Pokemon } = require('@models');
+const redisService = require('@services/redis.service');
 
 describe('Pokemon CRUD Operations', () => {
   let createdPokemonId;

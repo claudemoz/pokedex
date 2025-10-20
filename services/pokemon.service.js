@@ -4,7 +4,7 @@ const weatherService = require('./weather.service');
 
 const cacheTTL = parseInt(process.env.REDIS_CACHE_TTL) || 3600;
 
-exports.getAll = async (includeWeather = false, latitude = null, longitude = null) => {
+exports.getAll = async (includeWeather = false, latitude = null, longitude = null, cityName = null) => {
   try {
     const cacheKey = 'pokemons:all';
     
@@ -28,7 +28,7 @@ exports.getAll = async (includeWeather = false, latitude = null, longitude = nul
 
     // Appliquer les effets météo si demandé
     if (includeWeather) {
-      const weather = await weatherService.getWeather(latitude, longitude);
+      const weather = await weatherService.getWeather(latitude, longitude, cityName);
       pokemons = pokemons.map(pokemon => 
         weatherService.applyWeatherEffects(pokemon, weather)
       );
@@ -41,7 +41,7 @@ exports.getAll = async (includeWeather = false, latitude = null, longitude = nul
   }
 };
 
-exports.getById = async (id, includeWeather = false, latitude = null, longitude = null) => {
+exports.getById = async (id, includeWeather = false, latitude = null, longitude = null, cityName = null) => {
   try {
     const cacheKey = `pokemon:${id}`;
     
@@ -66,7 +66,7 @@ exports.getById = async (id, includeWeather = false, latitude = null, longitude 
 
     // Appliquer les effets météo si demandé
     if (includeWeather) {
-      const weather = await weatherService.getWeather(latitude, longitude);
+      const weather = await weatherService.getWeather(latitude, longitude, cityName);
       pokemon = weatherService.applyWeatherEffects(pokemon, weather);
       pokemon.weatherEffectDescription = weatherService.getWeatherEffectDescription(
         pokemon.type,
@@ -141,7 +141,7 @@ exports.delete = async (id) => {
   }
 };
 
-exports.searchByType = async (type, includeWeather = false, latitude = null, longitude = null) => {
+exports.searchByType = async (type, includeWeather = false, latitude = null, longitude = null, cityName = null) => {
   try {
     const cacheKey = `pokemons:type:${type}`;
     
@@ -167,7 +167,7 @@ exports.searchByType = async (type, includeWeather = false, latitude = null, lon
 
     // Appliquer les effets météo si demandé
     if (includeWeather) {
-      const weather = await weatherService.getWeather(latitude, longitude);
+      const weather = await weatherService.getWeather(latitude, longitude, cityName);
       pokemons = pokemons.map(pokemon => 
         weatherService.applyWeatherEffects(pokemon, weather)
       );
