@@ -12,7 +12,6 @@ module.exports = {
       name: {
         type: Sequelize.STRING(100),
         allowNull: false,
-        unique: true
       },
       type: {
         type: Sequelize.ENUM('fire', 'water', 'grass', 'electric', 'ice', 'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy', 'normal'),

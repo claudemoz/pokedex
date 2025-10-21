@@ -11,7 +11,7 @@ describe('Pokemon CRUD Operations', () => {
     redisService.connect();
     
     // Synchroniser la base de données
-    await sequelize.sync({ force: true });
+    // await sequelize.sync({ force: true });
     
     // Créer les données de test initiales
     await Pokemon.create({
