@@ -1,4 +1,13 @@
 const router = require('express').Router();
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('@configs/swagger');
+
+
+// Documentation Swagger
+router.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Pokédex API Documentation'
+}));
 
 // Routes Pokemon
 router.use('/pokemons', require('@routes/v1/pokemon.routes'));
