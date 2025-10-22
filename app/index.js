@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
+const { metricsMiddleware, metricsEndpoint } = require('@middlewares/metrics.middleware');
 const app = express();
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -22,6 +23,10 @@ app.use(express.urlencoded({ extended: true }));
 if (process.env.NODE_ENV === 'development') {
   app.use(logger('dev'));
 }
+
+// Métriques Prometheus
+app.use(metricsMiddleware);
+app.get('/metrics', metricsEndpoint);
 
 app.use('/api/v1', require('@routes/v1'));
 module.exports = app;
