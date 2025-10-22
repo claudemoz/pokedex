@@ -1,0 +1,82 @@
+version: '3.8'
+
+# PRODUCTION - Application Stack
+# Ce fichier est pour le serveur d'application (sans monitoring)
+# Prometheus et Grafana doivent être sur un hôte séparé
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: pokedex_postgres_prod
+    restart: always
+    environment:
+      POSTGRES_USER: ${PROD_DB_USERNAME}
+      POSTGRES_PASSWORD: ${PROD_DB_PASSWORD}
+      POSTGRES_DB: ${PROD_DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PROD_DB_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pokedex_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: pokedex_redis_prod
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD}", "ping"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - pokedex_network
+
+  api:
+    image: tsiang/pokedex-api:latest
+    container_name: pokedex_api_prod
+    restart: always
+    ports:
+      - "9000:9000"
+    environment:
+      NODE_ENV: production
+      PORT: 9000
+      PROD_DB_USERNAME: ${PROD_DB_USERNAME}
+      PROD_DB_PASSWORD: ${PROD_DB_PASSWORD}
+      PROD_DB_NAME: ${PROD_DB_NAME}
+      PROD_DB_HOSTNAME: postgres
+      PROD_DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_CACHE_TTL: 3600
+      WEATHER_API_KEY: ${WEATHER_API_KEY}
+      WEATHER_API_URL: https://api.openweathermap.org/data/2.5/weather
+      DEFAULT_LATITUDE: 48.8566
+      DEFAULT_LONGITUDE: 2.3522
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - pokedex_network
+    # NOTE: L'endpoint /metrics reste accessible pour Prometheus externe
+
+networks:
+  pokedex_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+

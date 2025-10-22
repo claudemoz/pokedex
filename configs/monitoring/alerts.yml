@@ -1,0 +1,84 @@
+groups:
+  - name: pokedex_api_alerts
+    interval: 30s
+    rules:
+      # Alerte : API down
+      - alert: ApiDown
+        expr: up{job="pokedex-api-prod"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API Pokedex est down"
+          description: "Le serveur API {{ $labels.instance }} est inaccessible depuis plus d'1 minute."
+
+      # Alerte : Taux d'erreur élevé
+      - alert: HighErrorRate
+        expr: rate(pokedex_http_requests_total{status_code=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Taux d'erreur élevé sur l'API"
+          description: "Le taux d'erreurs 5xx est de {{ $value | humanizePercentage }} sur {{ $labels.instance }}."
+
+      # Alerte : Latence élevée
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(pokedex_http_request_duration_seconds_bucket[5m])) > 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latence élevée sur l'API"
+          description: "Le P95 de latence est de {{ $value }}s sur {{ $labels.instance }}."
+
+      # Alerte : Utilisation CPU élevée
+      - alert: HighCpuUsage
+        expr: rate(pokedex_process_cpu_user_seconds_total[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Utilisation CPU élevée"
+          description: "L'utilisation CPU est de {{ $value | humanizePercentage }} sur {{ $labels.instance }}."
+
+      # Alerte : Utilisation mémoire élevée
+      - alert: HighMemoryUsage
+        expr: pokedex_process_resident_memory_bytes > 1073741824
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Utilisation mémoire élevée"
+          description: "L'utilisation mémoire est de {{ $value | humanize }}B sur {{ $labels.instance }}."
+
+      # Alerte : Redis déconnecté
+      - alert: RedisDisconnected
+        expr: pokedex_redis_connected == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis est déconnecté"
+          description: "La connexion Redis est down sur {{ $labels.instance }}."
+
+      # Alerte : Cache hit ratio faible
+      - alert: LowCacheHitRatio
+        expr: (pokedex_redis_cache_hits_total / (pokedex_redis_cache_hits_total + pokedex_redis_cache_misses_total)) < 0.3
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Cache hit ratio faible"
+          description: "Le cache hit ratio est de {{ $value | humanizePercentage }} sur {{ $labels.instance }}."
+
+      # Alerte : Trop de requêtes
+      - alert: HighRequestRate
+        expr: rate(pokedex_http_requests_total[5m]) > 1000
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "Taux de requêtes élevé"
+          description: "Le taux de requêtes est de {{ $value }} req/s sur {{ $labels.instance }}."
+

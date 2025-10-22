@@ -1,0 +1,62 @@
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@votredomaine.com'
+  smtp_auth_username: 'votre-email@gmail.com'
+  smtp_auth_password: 'votre-mot-de-passe-app'
+
+# Templates pour les notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Routes pour les alertes
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default-receiver'
+  
+  routes:
+    # Alertes critiques
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      continue: true
+    
+    # Alertes warning
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+
+# Receveurs d'alertes
+receivers:
+  - name: 'default-receiver'
+    email_configs:
+      - to: 'admin@votredomaine.com'
+        headers:
+          Subject: '[Pokedex] Alert: {{ .GroupLabels.alertname }}'
+
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'admin@votredomaine.com,devops@votredomaine.com'
+        headers:
+          Subject: '[CRITICAL] Pokedex Alert: {{ .GroupLabels.alertname }}'
+    # Optionnel : Slack
+    # slack_configs:
+    #   - api_url: 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL'
+    #     channel: '#alerts'
+    #     title: 'Alert: {{ .GroupLabels.alertname }}'
+
+  - name: 'warning-alerts'
+    email_configs:
+      - to: 'admin@votredomaine.com'
+
+# Inhibit rules (désactiver certaines alertes si d'autres sont actives)
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+

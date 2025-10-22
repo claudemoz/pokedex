@@ -1,0 +1,54 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'production'
+    environment: 'prod'
+
+# Charger les règles d'alerte
+rule_files:
+  - 'alerts.yml'
+
+# Configuration Alertmanager
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+scrape_configs:
+  # Prometheus lui-même
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Serveurs API Pokedex (hosts externes)
+  - job_name: 'pokedex-api-prod'
+    static_configs:
+      # Remplacez par vos IPs/domaines de serveurs
+      - targets: 
+          - 'app-server-1.votredomaine.com:9000'
+          - 'app-server-2.votredomaine.com:9000'
+          # Ajoutez d'autres serveurs si load balancing
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Si vous avez des exporters PostgreSQL
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets:
+          - 'db-server-1.votredomaine.com:9187'
+
+  # Si vous avez des exporters Redis
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets:
+          - 'redis-server-1.votredomaine.com:9121'
+
+  # Node exporter pour métriques système (si installé)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets:
+          - 'app-server-1.votredomaine.com:9100'
+          - 'app-server-2.votredomaine.com:9100'
+
